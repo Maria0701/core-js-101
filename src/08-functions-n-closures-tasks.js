@@ -93,7 +93,7 @@ function getPolynom() {
  */
 function memoize(fn) {
   const memory = new Map();
-  return function (arg) {
+  return (arg) => {
     if (memory.has(arg)) {
       return memory.get(arg);
     }
