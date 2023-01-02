@@ -30,26 +30,17 @@
  */
 
 function willYouMarryMe(isPositiveAnswer) {
-  if (typeof isPositiveAnswer !== 'boolean') {
-    return 'Wrong parameter is passed! Ask her again.';
-  }
-
-  return new Promise((resolve) => {
-    resolve(isPositiveAnswer);
-  })
-    .then((res) => {
-      let answer;
-      if (typeof res !== 'boolean') {
-        answer = 'Wrong parameter is passed! Ask her again.';
-      }
-      if (res) {
-        answer = 'Hooray!!! She said "Yes"!';
-      } else {
-        answer = 'Oh no, she said "No".';
-      }
-      return answer;
-    })
-    .catch(() => 'Wrong parameter is passed! Ask her again.');
+  return new Promise((resolve, reject) => {
+    const answer = isPositiveAnswer;
+    if (typeof answer !== 'boolean') {
+      reject(new Error('Wrong parameter is passed! Ask her again.'));
+    }
+    if (!answer && typeof answer === 'boolean') {
+      resolve('Oh no, she said "No".');
+    } else if (answer && typeof answer === 'boolean') {
+      resolve('Hooray!!! She said "Yes"!');
+    }
+  });
 }
 
 
@@ -68,8 +59,9 @@ function willYouMarryMe(isPositiveAnswer) {
  *    })
  *
  */
-function processAllPromises(/* array */) {
-  throw new Error('Not implemented');
+function processAllPromises(arr) {
+  return Promise.all(arr)
+    .then((values) => values);
 }
 
 /**
@@ -91,8 +83,9 @@ function processAllPromises(/* array */) {
  *    })
  *
  */
-function getFastestPromise(/* array */) {
-  throw new Error('Not implemented');
+function getFastestPromise(arr) {
+  return Promise.race(arr)
+    .then((values) => values);
 }
 
 /**
@@ -112,8 +105,27 @@ function getFastestPromise(/* array */) {
  *    });
  *
  */
-function chainPromises(/* array, action */) {
-  throw new Error('Not implemented');
+function chainPromises(array, action) {
+  const p = new Promise((resolve, reject) => {
+    let counter = 0;
+    const results = [];
+    for (let i = 0; i < array.length; i += 1) {
+      Promise.resolve(array[i])
+      // eslint-disable-next-line no-loop-func
+        .then((value) => {
+          counter += 1;
+          results[i] = value;
+          if (counter === array.length) {
+            resolve(results);
+          }
+        })
+        .catch((err) => reject(err));
+    }
+  })
+    .then((res) => res.reduce(action))
+    .catch((err) => new Error(err));
+
+  return p;
 }
 
 module.exports = {
